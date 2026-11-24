@@ -26,6 +26,7 @@ public class ClaimsDbContext : DbContext
         modelBuilder.Entity<ClaimAuditEntry>(b =>
         {
             b.HasKey(a => a.Id);
+            b.Property(a => a.Id).ValueGeneratedNever();
             b.Property(a => a.Status).HasConversion<string>();
         });
 
