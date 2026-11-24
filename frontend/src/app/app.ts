@@ -61,6 +61,19 @@ export class App implements OnInit {
   currentOfficerId = 'officer.sarah';
   markets = ['SG', 'MY', 'HK', 'TH', 'AU', 'JP'];
 
+  currencies = ['MYR', 'USD', 'SGD', 'HKD', 'THB', 'AUD', 'JPY'];
+  selectedCurrency = 'MYR';
+
+  private readonly fxRatesFromUsd: Record<string, { symbol: string; rate: number }> = {
+    USD: { symbol: '$', rate: 1.00 },
+    MYR: { symbol: 'RM ', rate: 4.12 },
+    SGD: { symbol: 'S$', rate: 1.29 },
+    HKD: { symbol: 'HK$', rate: 7.84 },
+    THB: { symbol: '฿', rate: 33.90 },
+    AUD: { symbol: 'A$', rate: 1.51 },
+    JPY: { symbol: '¥', rate: 159.30 }
+  };
+
   claims: Claim[] = [];
   selectedClaim: Claim | null = null;
   exposure: ExposureDashboard | null = null;
@@ -86,6 +99,17 @@ export class App implements OnInit {
 
   ngOnInit() {
     this.refreshAll();
+  }
+
+  formatMoney(amountUsd: number | undefined | null): string {
+    const val = amountUsd ?? 0;
+    const fx = this.fxRatesFromUsd[this.selectedCurrency] || this.fxRatesFromUsd['USD'];
+    const converted = val * fx.rate;
+    const decimals = this.selectedCurrency === 'JPY' ? 0 : 2;
+    return `${fx.symbol}${converted.toLocaleString('en-US', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    })}`;
   }
 
   switchRole(role: 'CLAIMANT' | 'STAFF') {
@@ -157,7 +181,8 @@ export class App implements OnInit {
       next: () => {
         this.showToast(`Claim assigned to ${this.currentOfficerId}`);
         setTimeout(() => this.refreshAll(), 300);
-      }
+      },
+      error: (err) => this.showToast(err.error?.error || 'Assign failed')
     });
   }
 
@@ -171,7 +196,8 @@ export class App implements OnInit {
         this.showToast('Requested additional info from claimant.');
         this.infoQuestion = '';
         setTimeout(() => this.refreshAll(), 300);
-      }
+      },
+      error: (err) => this.showToast(err.error?.error || 'Request info failed')
     });
   }
 
@@ -185,7 +211,8 @@ export class App implements OnInit {
       next: () => {
         this.showToast('Claim settled & liability exposure updated.');
         setTimeout(() => this.refreshAll(), 300);
-      }
+      },
+      error: (err) => this.showToast(err.error?.error || 'Settlement failed')
     });
   }
 
@@ -198,7 +225,8 @@ export class App implements OnInit {
       next: () => {
         this.showToast('Claim rejected.');
         setTimeout(() => this.refreshAll(), 300);
-      }
+      },
+      error: (err) => this.showToast(err.error?.error || 'Rejection failed')
     });
   }
 

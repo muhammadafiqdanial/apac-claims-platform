@@ -6,6 +6,11 @@
     </div>
 
     <div class="role-switcher">
+      <span class="role-label">Currency:</span>
+      <select [(ngModel)]="selectedCurrency" class="currency-select">
+        <option *ngFor="let cur of currencies" [value]="cur">{{ cur }}</option>
+      </select>
+
       <span class="role-label">Active Persona:</span>
       <button [class.active]="activeRole === 'CLAIMANT'" (click)="switchRole('CLAIMANT')">
         Claimant Portal
@@ -42,7 +47,7 @@
             </select>
           </label>
         </div>
-        <label>Estimated Damage / Liability (USD eq.)
+        <label>Estimated Damage / Liability (Base USD eq.)
           <input type="number" [(ngModel)]="newClaim.estimatedLiability" name="amount" min="1" required />
         </label>
         <label>Incident Description
@@ -69,7 +74,7 @@
       <div *ngIf="selectedClaim" class="detail-box">
         <h3>Claim Timeline: {{ selectedClaim.claimNumber }}</h3>
         <div *ngIf="selectedClaim.status === 'Settled'" class="banner success">
-          Decision: <strong>Settled for ${{ selectedClaim.settledAmount | number }}</strong>
+          Decision: <strong>Settled for {{ formatMoney(selectedClaim.settledAmount) }}</strong>
         </div>
         <div *ngIf="selectedClaim.status === 'Rejected'" class="banner danger">
           Decision: <strong>Claim Rejected</strong>
@@ -97,16 +102,16 @@
   <main *ngIf="activeRole === 'STAFF'">
     <section class="kpi-grid" *ngIf="exposure">
       <div class="kpi-card">
-        <span class="kpi-label">Total Outstanding Liability</span>
-        <span class="kpi-value">${{ exposure.totalOutstandingLiability | number }}</span>
+        <span class="kpi-label">Total Outstanding Liability ({{ selectedCurrency }})</span>
+        <span class="kpi-value">{{ formatMoney(exposure.totalOutstandingLiability) }}</span>
       </div>
       <div class="kpi-card">
         <span class="kpi-label">Open Claims Across APAC</span>
         <span class="kpi-value">{{ exposure.totalOpenClaims }}</span>
       </div>
       <div class="kpi-card">
-        <span class="kpi-label">Total Settled Payouts</span>
-        <span class="kpi-value">${{ exposure.totalSettledAmount | number }}</span>
+        <span class="kpi-label">Total Settled Payouts ({{ selectedCurrency }})</span>
+        <span class="kpi-value">{{ formatMoney(exposure.totalSettledAmount) }}</span>
       </div>
       <div class="kpi-card">
         <span class="kpi-label">Logged-In Officer</span>
@@ -154,7 +159,7 @@
               <td><strong>{{ c.claimNumber }}</strong></td>
               <td>{{ c.market }}</td>
               <td>{{ c.type }}</td>
-              <td>${{ c.estimatedLiability | number }}</td>
+              <td>{{ formatMoney(c.estimatedLiability) }}</td>
               <td>{{ c.assignedOfficerId || 'Unassigned' }}</td>
               <td><span class="badge" [attr.data-status]="c.status">{{ c.status }}</span></td>
             </tr>
@@ -177,7 +182,7 @@
               <button class="btn-secondary" (click)="requestInfo()">Request Info</button>
             </div>
             <div class="control-row">
-              <input type="number" [(ngModel)]="settleAmount" placeholder="Settlement $" />
+              <input type="number" [(ngModel)]="settleAmount" placeholder="Settlement (Base USD)" />
               <input [(ngModel)]="settleNotes" placeholder="Settlement notes" />
               <button class="btn-success" (click)="settleClaim()">Settle Claim</button>
             </div>
@@ -198,7 +203,7 @@
 
       <section class="card" *ngIf="exposure">
         <h2>Liability Exposure by Market & Product</h2>
-        <p class="muted small">Updated asynchronously via domain event consumer</p>
+        <p class="muted small">Updated asynchronously via domain event consumer ({{ selectedCurrency }})</p>
         <table class="data-table">
           <thead>
             <tr>
@@ -214,8 +219,8 @@
               <td><strong>{{ row.market }}</strong></td>
               <td>{{ row.type }}</td>
               <td>{{ row.openClaimsCount }}</td>
-              <td>${{ row.totalOutstandingLiability | number }}</td>
-              <td>${{ row.totalSettledAmount | number }}</td>
+              <td>{{ formatMoney(row.totalOutstandingLiability) }}</td>
+              <td>{{ formatMoney(row.totalSettledAmount) }}</td>
             </tr>
           </tbody>
         </table>
