@@ -1,0 +1,245 @@
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo-dot"></span>
+      <h1>APAC Claims & Exposure Platform</h1>
+    </div>
+
+    <div class="role-switcher">
+      <span class="role-label">Active Persona:</span>
+      <button [class.active]="activeRole === 'CLAIMANT'" (click)="switchRole('CLAIMANT')">
+        Claimant Portal
+      </button>
+      <button [class.active]="activeRole === 'STAFF'" (click)="switchRole('STAFF')">
+        Claims Staff & Exposure
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="toastMessage" class="toast">{{ toastMessage }}</div>
+
+  <!-- ==================== CLAIMANT PORTAL ==================== -->
+  <main *ngIf="activeRole === 'CLAIMANT'" class="grid-two">
+    <section class="card">
+      <h2>Report an Incident</h2>
+      <form (ngSubmit)="submitClaim()" class="form-stack">
+        <label>Policy Number
+          <input [(ngModel)]="newClaim.policyNumber" name="policy" placeholder="e.g. POL-SG-9012" required />
+        </label>
+        <label>Your Full Name
+          <input [(ngModel)]="newClaim.claimantName" name="name" placeholder="e.g. Sarah Lim" required />
+        </label>
+        <div class="row">
+          <label>APAC Market
+            <select [(ngModel)]="newClaim.market" name="market">
+              <option *ngFor="let m of markets" [value]="m">{{ m }}</option>
+            </select>
+          </label>
+          <label>Claim Type
+            <select [(ngModel)]="newClaim.type" name="type">
+              <option value="Motor">Motor</option>
+              <option value="Property">Property</option>
+            </select>
+          </label>
+        </div>
+        <label>Estimated Damage / Liability (USD eq.)
+          <input type="number" [(ngModel)]="newClaim.estimatedLiability" name="amount" min="1" required />
+        </label>
+        <label>Incident Description
+          <textarea [(ngModel)]="newClaim.description" name="desc" rows="3" placeholder="Describe what happened..." required></textarea>
+        </label>
+        <button type="submit" class="btn-primary">Submit Claim</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Track Your Claims</h2>
+      <p class="muted">Select any claim below to view real-time status updates or respond to officer requests.</p>
+
+      <div class="claim-list">
+        <div *ngFor="let c of claims" class="claim-item" [class.selected]="selectedClaim?.id === c.id" (click)="selectClaim(c)">
+          <div>
+            <strong>{{ c.claimNumber }}</strong> · {{ c.claimantName }} ({{ c.market }} - {{ c.type }})
+            <div class="muted small">{{ c.description }}</div>
+          </div>
+          <span class="badge" [attr.data-status]="c.status">{{ c.status }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="selectedClaim" class="detail-box">
+        <h3>Claim Timeline: {{ selectedClaim.claimNumber }}</h3>
+        <div *ngIf="selectedClaim.status === 'Settled'" class="banner success">
+          Decision: <strong>Settled for ${{ selectedClaim.settledAmount | number }}</strong>
+        </div>
+        <div *ngIf="selectedClaim.status === 'Rejected'" class="banner danger">
+          Decision: <strong>Claim Rejected</strong>
+        </div>
+
+        <div *ngIf="selectedClaim.status === 'InfoRequired'" class="action-panel warn">
+          <strong>Action Needed:</strong> Claims staff requested additional details.
+          <div class="row mt-1">
+            <input [(ngModel)]="claimantReplyText" placeholder="Enter requested details or document ref..." />
+            <button class="btn-primary" (click)="provideInfo()">Send Reply</button>
+          </div>
+        </div>
+
+        <ul class="timeline">
+          <li *ngFor="let entry of selectedClaim.timeline">
+            <span class="time">{{ entry.timestamp | date:'short' }}</span>
+            <strong>[{{ entry.status }}]</strong> {{ entry.note }} <em>({{ entry.actor }})</em>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== STAFF & EXPOSURE WORKBENCH ==================== -->
+  <main *ngIf="activeRole === 'STAFF'">
+    <section class="kpi-grid" *ngIf="exposure">
+      <div class="kpi-card">
+        <span class="kpi-label">Total Outstanding Liability</span>
+        <span class="kpi-value">${{ exposure.totalOutstandingLiability | number }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Open Claims Across APAC</span>
+        <span class="kpi-value">{{ exposure.totalOpenClaims }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Total Settled Payouts</span>
+        <span class="kpi-value">${{ exposure.totalSettledAmount | number }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Logged-In Officer</span>
+        <select [(ngModel)]="currentOfficerId" class="officer-select">
+          <option value="officer.sarah">officer.sarah</option>
+          <option value="officer.david">officer.david</option>
+          <option value="officer.kenji">officer.kenji</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="grid-two mt-2">
+      <section class="card">
+        <div class="row space-between">
+          <h2>Incoming Claims Queue</h2>
+          <div class="row">
+            <select [(ngModel)]="filterMarket" (change)="refreshAll()">
+              <option value="">All Markets</option>
+              <option *ngFor="let m of markets" [value]="m">{{ m }}</option>
+            </select>
+            <select [(ngModel)]="filterStatus" (change)="refreshAll()">
+              <option value="">All Statuses</option>
+              <option value="Submitted">Submitted</option>
+              <option value="UnderReview">UnderReview</option>
+              <option value="InfoRequired">InfoRequired</option>
+              <option value="Settled">Settled</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Claim #</th>
+              <th>Market</th>
+              <th>Type</th>
+              <th>Est. Liability</th>
+              <th>Officer</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of claims" (click)="selectClaim(c)" [class.selected]="selectedClaim?.id === c.id">
+              <td><strong>{{ c.claimNumber }}</strong></td>
+              <td>{{ c.market }}</td>
+              <td>{{ c.type }}</td>
+              <td>${{ c.estimatedLiability | number }}</td>
+              <td>{{ c.assignedOfficerId || 'Unassigned' }}</td>
+              <td><span class="badge" [attr.data-status]="c.status">{{ c.status }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="selectedClaim" class="detail-box">
+          <div class="row space-between">
+            <h3>Assessing {{ selectedClaim.claimNumber }} — {{ selectedClaim.claimantName }}</h3>
+            <button *ngIf="selectedClaim.status !== 'Settled' && selectedClaim.status !== 'Rejected'"
+                    class="btn-secondary" (click)="assignToMe()">
+              Assign to {{ currentOfficerId }}
+            </button>
+          </div>
+          <p>{{ selectedClaim.description }}</p>
+
+          <div *ngIf="selectedClaim.status !== 'Settled' && selectedClaim.status !== 'Rejected'" class="staff-controls">
+            <div class="control-row">
+              <input [(ngModel)]="infoQuestion" placeholder="Question for claimant..." />
+              <button class="btn-secondary" (click)="requestInfo()">Request Info</button>
+            </div>
+            <div class="control-row">
+              <input type="number" [(ngModel)]="settleAmount" placeholder="Settlement $" />
+              <input [(ngModel)]="settleNotes" placeholder="Settlement notes" />
+              <button class="btn-success" (click)="settleClaim()">Settle Claim</button>
+            </div>
+            <div class="control-row">
+              <input [(ngModel)]="rejectReason" placeholder="Rejection reason..." />
+              <button class="btn-danger" (click)="rejectClaim()">Reject Claim</button>
+            </div>
+          </div>
+
+          <ul class="timeline">
+            <li *ngFor="let entry of selectedClaim.timeline">
+              <span class="time">{{ entry.timestamp | date:'short' }}</span>
+              <strong>[{{ entry.status }}]</strong> {{ entry.note }}
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="card" *ngIf="exposure">
+        <h2>Liability Exposure by Market & Product</h2>
+        <p class="muted small">Updated asynchronously via domain event consumer</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Market</th>
+              <th>Product</th>
+              <th>Open</th>
+              <th>Outstanding Liability</th>
+              <th>Settled</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of exposure.byMarketAndType">
+              <td><strong>{{ row.market }}</strong></td>
+              <td>{{ row.type }}</td>
+              <td>{{ row.openClaimsCount }}</td>
+              <td>${{ row.totalOutstandingLiability | number }}</td>
+              <td>${{ row.totalSettledAmount | number }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 class="mt-2">Team Workload & Performance</h2>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Officer</th>
+              <th>Active Queue</th>
+              <th>Settled</th>
+              <th>Rejected</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let w of exposure.officerWorkload">
+              <td><strong>{{ w.officerId }}</strong></td>
+              <td>{{ w.activeClaims }}</td>
+              <td>{{ w.settledCount }}</td>
+              <td>{{ w.rejectedCount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+</div>

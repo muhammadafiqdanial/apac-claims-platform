@@ -1,0 +1,53 @@
+:host { font-family: system-ui, -apple-system, sans-serif; color: #1e293b; background: #f1f5f9; display: block; min-height: 100vh; }
+.shell { max-width: 1320px; margin: 0 auto; padding: 1.25rem; }
+.topbar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; color: #fff; padding: 1rem 1.5rem; border-radius: 10px; margin-bottom: 1.25rem; }
+.brand { display: flex; align-items: center; gap: 0.75rem; }
+.brand h1 { font-size: 1.15rem; margin: 0; }
+.logo-dot { width: 12px; height: 12px; border-radius: 50%; background: #38bdf8; }
+.role-switcher { display: flex; align-items: center; gap: 0.5rem; }
+.role-label { font-size: 0.85rem; color: #94a3b8; margin-right: 0.25rem; }
+.role-switcher button { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.role-switcher button.active { background: #0284c7; color: #fff; border-color: #38bdf8; }
+.toast { background: #0f766e; color: #fff; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 500; }
+.grid-two { display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.25rem; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.kpi-card, .card { background: #fff; padding: 1.25rem; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.kpi-label { display: block; font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+.kpi-value { font-size: 1.65rem; font-weight: 700; color: #0f172a; margin-top: 0.25rem; display: block; }
+.officer-select { margin-top: 0.4rem; width: 100%; padding: 0.4rem; }
+.form-stack { display: flex; flex-direction: column; gap: 0.85rem; }
+.form-stack label { display: flex; flex-direction: column; font-size: 0.85rem; font-weight: 600; gap: 0.3rem; }
+input, select, textarea { padding: 0.55rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
+.row { display: flex; gap: 0.75rem; align-items: center; }
+.space-between { justify-content: space-between; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1.25rem; }
+.muted { color: #64748b; }
+.small { font-size: 0.82rem; }
+button { cursor: pointer; border: none; border-radius: 6px; padding: 0.55rem 0.9rem; font-weight: 600; }
+.btn-primary { background: #0284c7; color: #fff; }
+.btn-secondary { background: #e2e8f0; color: #0f172a; }
+.btn-success { background: #16a34a; color: #fff; }
+.btn-danger { background: #dc2626; color: #fff; }
+.claim-list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.75rem; }
+.claim-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; }
+.claim-item.selected, tr.selected { background: #f0f9ff; border-color: #0284c7; }
+.badge { padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; background: #e2e8f0; }
+.badge[data-status="Submitted"] { background: #dbeafe; color: #1d4ed8; }
+.badge[data-status="UnderReview"] { background: #fef3c7; color: #b45309; }
+.badge[data-status="InfoRequired"] { background: #ffedd5; color: #c2410c; }
+.badge[data-status="Settled"] { background: #dcfce7; color: #15803d; }
+.badge[data-status="Rejected"] { background: #fee2e2; color: #b91c1c; }
+.detail-box { margin-top: 1.25rem; padding-top: 1rem; border-top: 2px solid #e2e8f0; }
+.banner { padding: 0.65rem; border-radius: 6px; margin-bottom: 0.75rem; }
+.banner.success { background: #dcfce7; color: #166534; }
+.banner.danger { background: #fee2e2; color: #991b1b; }
+.action-panel.warn { background: #fff7ed; border: 1px solid #fdba74; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.75rem; }
+.staff-controls { display: flex; flex-direction: column; gap: 0.5rem; background: #f8fafc; padding: 0.75rem; border-radius: 8px; margin: 0.75rem 0; }
+.control-row { display: flex; gap: 0.5rem; }
+.control-row input { flex: 1; }
+.timeline { list-style: none; padding: 0; margin: 0.75rem 0 0; display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.85rem; }
+.timeline .time { color: #64748b; margin-right: 0.4rem; }
+.data-table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.88rem; }
+.data-table th, .data-table td { text-align: left; padding: 0.6rem; border-bottom: 1px solid #e2e8f0; }
+.data-table tbody tr { cursor: pointer; }
